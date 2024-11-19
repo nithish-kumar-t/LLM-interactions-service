@@ -1,13 +1,15 @@
-val scala3Version = "3.5.0"
+import sbt.enablePlugins
+
+val scala2Version = "2.13.12"
 
 lazy val root = project
   .in(file("."))
   .settings(
     name := "LLM-hw3",
     version := "0.1.0-SNAPSHOT",
-    scalaVersion := scala3Version,
+    scalaVersion := scala2Version,
 
-    scalaVersion := scala3Version,
+    scalaVersion := scala2Version,
     libraryDependencies ++= Seq(
       "com.typesafe.akka" %% "akka-actor" % "2.6.20",
       "com.typesafe.akka" %% "akka-stream" % "2.6.20",
