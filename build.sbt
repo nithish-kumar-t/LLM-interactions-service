@@ -6,9 +6,8 @@ lazy val root = project
     name := "LLM-hw3",
     version := "0.1.0-SNAPSHOT",
     scalaVersion := scala3Version,
-    //    assembly / mainClass := Some("main.scala.MyMapReduceJob"),
 
-    scalaVersion := scala2Version,
+    scalaVersion := scala3Version,
     libraryDependencies ++= Seq(
       "com.typesafe.akka" %% "akka-actor" % "2.6.20",
       "com.typesafe.akka" %% "akka-stream" % "2.6.20",
