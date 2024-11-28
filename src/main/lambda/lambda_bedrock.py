@@ -1,26 +1,41 @@
+# import json
+
+# def lambda_handler(event, context):
+#     # TODO implement
+#     return {
+#         'statusCode': 200,
+#         'body': json.dumps('Hello from Lambda!')
+#     }
+
 import json
 import boto3
 import os
-import logging
+from botocore.config import Config
 
-
-# Configure logging
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
 
 def lambda_handler(event, context):
     # Initialize Bedrock client
     os.environ['BEDROCK_MODEL_ARN'] = 'arn:aws:bedrock:us-east-2:908027374121:inference-profile/us.meta.llama3-2-1b-instruct-v1:0'
 
-    bedrock_client = boto3.client(service_name='bedrock-runtime')
+    config = Config(
+        read_timeout=30000,  # Increased from 10 to 30 seconds
+        connect_timeout=10,
+        retries={
+            'max_attempts': 3,
+            'mode': 'standard'
+        })
+
+    bedrock_client = boto3.client(service_name='bedrock-runtime', config=config)
 
     # Extract input from the event
-    user_input = event.get('input', 'Hello, world!')
+    print("event")
+    print(event)
+    input_data = json.loads(event.get('body', {}))
+    user_input = input_data.get('input', 'Hello, world!')
 
     # Define the model ARN (replace with your specific model ARN)
     model_arn = os.environ.get('BEDROCK_MODEL_ARN')
     # print(model_arn)
-
 
     if not model_arn:
         return {
@@ -34,6 +49,7 @@ def lambda_handler(event, context):
             modelId=model_arn,
             body=json.dumps({
                 "prompt": user_input
+                # "maxTokens": 100
             }),
             contentType='application/json'
         )
@@ -44,7 +60,9 @@ def lambda_handler(event, context):
 
         # Extract the generated text (this depends on the model's response structure)
         generated_text = response_json.get('generation', {})
-        logger.info(response_payload)
+
+        print(response_payload)
+        print(response_json)
 
         return {
             'statusCode': 200,

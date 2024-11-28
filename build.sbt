@@ -1,6 +1,6 @@
 import sbt.enablePlugins
 
-val scala2Version = "2.13.12"
+val scala2Version = "2.13.13"
 
 lazy val root = project
   .in(file("."))
@@ -16,6 +16,9 @@ lazy val root = project
       "com.typesafe.akka" %% "akka-http" % "10.2.10",
       "com.typesafe.akka" %% "akka-http-spray-json" % "10.2.10", // JSON marshalling/unmarshalling
       "io.github.ollama4j" % "ollama4j" % "1.0.79", // Ollama
+      "software.amazon.awssdk" % "lambda" % "2.25.27", // AWS Lambda SDK
+      "software.amazon.awssdk" % "core" % "2.26.25",    // AWS Core SDK
+      "com.softwaremill.sttp.client3" %% "core" % "3.9.7",
       "org.scalatest" %% "scalatest" % "3.2.16" % Test,
       "org.scalameta" %% "munit" % "1.0.0" % Test
     ),

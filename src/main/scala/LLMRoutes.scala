@@ -13,7 +13,7 @@ object LLMRoutes {
 
   val routes: Route = concat(
     path("query-llm") {
-      post {
+      get {
         entity(as[LLMRequest]) { request =>
           val response = queryLLM(request)
           complete(response)
