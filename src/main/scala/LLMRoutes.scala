@@ -1,22 +1,63 @@
+import akka.actor.ActorSystem
+import akka.http.scaladsl.Http
+import akka.http.scaladsl.model._
+import akka.http.scaladsl.model.headers._
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Route
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import akka.stream.ActorMaterializer
 import JsonFormats._
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+
+import scala.concurrent.Future
+import scala.concurrent.duration._
 
 object LLMRoutes {
 
-  def queryLLM(request: LLMRequest): LLMResponse = {
-    // Simulate a response from the LLM
-    LLMResponse(s"The LLM response for '${request.query}' is: Example response")
+  private def queryLLM(request: LLMRequest)(implicit system: ActorSystem): Future[LLMResponse] = {
+    implicit val ec = system.dispatcher
+    implicit val materializer = ActorMaterializer()
+
+    val url = "https://tfz33jek7j.execute-api.us-east-2.amazonaws.com/PRODStage/queryLLM"
+
+    // Convert request to JSON
+    import spray.json._
+    val requestJson = request.toJson.compactPrint
+
+    // Create HTTP request
+    val httpRequest = HttpRequest(
+      method = HttpMethods.GET,
+      uri = Uri(url),
+      headers = List(`Content-Type`(ContentTypes.`application/json`)),
+      entity = HttpEntity(ContentTypes.`application/json`, requestJson)
+    )
+
+    // Send request and handle response
+    val responseFuture = Http().singleRequest(httpRequest).flatMap { response =>
+      response.status match {
+        case StatusCodes.OK =>
+          // Extract response body and parse JSON
+          response.entity.toStrict(5.seconds).map { entity =>
+            val responseBody = entity.data.utf8String
+            println(responseBody)
+            responseBody.parseJson.convertTo[LLMResponse]
+          }
+        case _ =>
+          // Handle error cases
+          Future.failed(new RuntimeException(s"API call failed with status: ${response.status}"))
+      }
+    }
+
+    responseFuture
   }
 
-  val routes: Route = concat(
+  def routes(implicit system: ActorSystem): Route = concat(
     path("query-llm") {
       get {
         entity(as[LLMRequest]) { request =>
-          val response = queryLLM(request)
-          complete(response)
+          // Use onSuccess to handle the asynchronous API call
+          onSuccess(queryLLM(request)) { response =>
+            complete(response)
+          }
         }
       }
     },

@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+// The LogQueryRequest message definition.
+message LlmQueryRequest {
+  string input = 1;
+  int32 maxWords = 2;
+}
+
+// The LogQueryResponse message definition.
+message LlmResponse {
+  bool response = 1;
+}

@@ -1,13 +1,14 @@
-import spray.json.DefaultJsonProtocol._
+import spray.json._
+import DefaultJsonProtocol._
 
-// Define case classes for requests and responses
-case class LLMRequest(query: String)
-case class LLMResponse(response: String)
+// Case classes with proper structure
+case class LLMRequest(input: String)
+case class LLMResponse(input: String, output: String)
 
-// Import these implicits to enable JSON marshalling/unmarshalling
+// JSON Formats
 object JsonFormats {
-  import spray.json.DefaultJsonProtocol._
+  implicit val llmRequestFormat: RootJsonFormat[LLMRequest] = jsonFormat1(LLMRequest)
 
-  implicit val llmRequestFormat = jsonFormat1(LLMRequest)
-  implicit val llmResponseFormat = jsonFormat1(LLMResponse)
+  // using JsonFormat2 to format custom objects
+  implicit val responseObjectFormat: RootJsonFormat[LLMResponse] = jsonFormat2(LLMResponse)
 }
