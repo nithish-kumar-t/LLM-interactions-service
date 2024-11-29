@@ -1,14 +1,38 @@
 import spray.json._
 import DefaultJsonProtocol._
+import protobuf.llmQuery.{LlmQueryRequest, LlmQueryResponse}
 
-// Case classes with proper structure
-case class LLMRequest(input: String)
-case class LLMResponse(input: String, output: String)
+
+
+// Intermediate case classes for proto objects
+case class LlmQueryRequestCase(input: String)
+case class LlmQueryResponseCase(output: String)
 
 // JSON Formats
 object JsonFormats {
-  implicit val llmRequestFormat: RootJsonFormat[LLMRequest] = jsonFormat1(LLMRequest)
 
-  // using JsonFormat2 to format custom objects
-  implicit val responseObjectFormat: RootJsonFormat[LLMResponse] = jsonFormat2(LLMResponse)
+  // JSON formats for intermediate case classes
+  implicit val llmQueryRequestCaseFormat: RootJsonFormat[LlmQueryRequestCase] = jsonFormat1(LlmQueryRequestCase)
+  implicit val llmQueryResponseCaseFormat: RootJsonFormat[LlmQueryResponseCase] = jsonFormat1(LlmQueryResponseCase)
+
+  // Custom formats for proto-generated classes
+  implicit val llmQueryRequestFormat: RootJsonFormat[LlmQueryRequest] = new RootJsonFormat[LlmQueryRequest] {
+    override def write(obj: LlmQueryRequest): JsValue = {
+      LlmQueryRequestCase(obj.input).toJson
+    }
+    override def read(json: JsValue): LlmQueryRequest = {
+      val caseClass = json.convertTo[LlmQueryRequestCase]
+      LlmQueryRequest(caseClass.input)
+    }
+  }
+
+  implicit val llmQueryResponseFormat: RootJsonFormat[LlmQueryResponse] = new RootJsonFormat[LlmQueryResponse] {
+    override def write(obj: LlmQueryResponse): JsValue = {
+      LlmQueryResponseCase(obj.output).toJson
+    }
+    override def read(json: JsValue): LlmQueryResponse = {
+      val caseClass = json.convertTo[LlmQueryResponseCase]
+      LlmQueryResponse(caseClass.output)
+    }
+  }
 }

@@ -1,15 +1,15 @@
-import sbt.enablePlugins
+import sbt.Keys.libraryDependencies
+import sbtprotoc.ProtocPlugin.autoImport._
 
-val scala2Version = "2.13.13"
 
 lazy val root = project
   .in(file("."))
+  .enablePlugins(ProtocPlugin) // Enable the ProtocPlugin explicitly
   .settings(
     name := "LLM-hw3",
     version := "0.1.0-SNAPSHOT",
-    scalaVersion := scala2Version,
+    scalaVersion := "2.13.13",
 
-    scalaVersion := scala2Version,
     libraryDependencies ++= Seq(
       "com.typesafe.akka" %% "akka-actor" % "2.6.20",
       "com.typesafe.akka" %% "akka-stream" % "2.6.20",
@@ -19,9 +19,20 @@ lazy val root = project
       "software.amazon.awssdk" % "lambda" % "2.25.27", // AWS Lambda SDK
       "software.amazon.awssdk" % "core" % "2.26.25",    // AWS Core SDK
       "com.softwaremill.sttp.client3" %% "core" % "3.9.7",
+      "com.thesamet.scalapb" %% "scalapb-json4s" % "0.11.0",
+      "com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf",
       "org.scalatest" %% "scalatest" % "3.2.16" % Test,
       "org.scalameta" %% "munit" % "1.0.0" % Test
     ),
+
+    // Include .proto files in the project resources
+    Compile / PB.protoSources := Seq(file("src/main/protobuf")),
+
+    Compile / PB.targets := Seq(
+      scalapb.gen() -> (sourceManaged in Compile).value
+    ),
+
+    // Assembly configuration
     assembly / assemblyMergeStrategy := {
       case PathList("META-INF", xs @ _*) =>
         xs match {
@@ -35,6 +46,5 @@ lazy val root = project
       case  _ => MergeStrategy.first
     }
   )
-
 
 resolvers += "Conjars Repo" at "https://conjars.org/repo"

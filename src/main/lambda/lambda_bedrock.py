@@ -10,6 +10,7 @@
 import json
 import boto3
 import os
+import base64
 from botocore.config import Config
 
 
@@ -25,13 +26,29 @@ def lambda_handler(event, context):
             'mode': 'standard'
         })
 
-    bedrock_client = boto3.client(service_name='bedrock-runtime', config=config)
-
     # Extract input from the event
     print("event")
     print(event)
-    input_data = json.loads(event.get('body', {}))
-    user_input = input_data.get('input', 'Hello, world!')
+    input_data = event.get('body', "")
+    # user_input = input_data.get('input', 'Hello, world!')
+
+    # input = json.loads(input_data)
+    print(input)
+
+    input_bytes = base64.b64decode(input_data)
+
+    # Decode the bytes to a UTF-8 string
+    decoded_string = input_bytes.decode('utf-8')
+    reqBody = {}
+
+    for param in decoded_string.strip().split("\n"):
+        k, v = param.split(":")
+        reqBody[k] = v.strip().strip('\"')
+
+    user_input = reqBody.get('input', 'Hello, world!')
+
+    bedrock_client = boto3.client(service_name='bedrock-runtime', config=config)
+
 
     # Define the model ARN (replace with your specific model ARN)
     model_arn = os.environ.get('BEDROCK_MODEL_ARN')

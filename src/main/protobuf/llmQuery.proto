@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+package protobuf;
+
 // The LLMRequest message definition.
 message LlmQueryRequest {
   string input = 1;

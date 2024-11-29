@@ -11,24 +11,28 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
+// Convert request to JSON
+import spray.json._
+
+import protobuf.llmQuery.{LlmQueryRequest, LlmQueryResponse}
+
 object LLMRoutes {
 
-  private def queryLLM(request: LLMRequest)(implicit system: ActorSystem): Future[LLMResponse] = {
+  private def queryLLM(request: LLMRequest)(implicit system: ActorSystem): Future[LlmQueryResponse] = {
     implicit val ec = system.dispatcher
     implicit val materializer = ActorMaterializer()
 
     val url = "https://tfz33jek7j.execute-api.us-east-2.amazonaws.com/PRODStage/queryLLM"
 
-    // Convert request to JSON
-    import spray.json._
-    val requestJson = request.toJson.compactPrint
+    //val llmReq : LlmQueryRequest =
+    val protoRequest : LlmQueryRequest = new LlmQueryRequest(request.input, 0)
 
     // Create HTTP request
     val httpRequest = HttpRequest(
       method = HttpMethods.GET,
       uri = Uri(url),
-      headers = List(`Content-Type`(ContentTypes.`application/json`)),
-      entity = HttpEntity(ContentTypes.`application/json`, requestJson)
+      headers = List(`Content-Type`(ContentTypes.`application/grpc+proto`)),
+      entity = HttpEntity(ContentTypes.`application/grpc+proto`, protoRequest.toProtoString.getBytes)
     )
 
     // Send request and handle response
@@ -36,10 +40,12 @@ object LLMRoutes {
       response.status match {
         case StatusCodes.OK =>
           // Extract response body and parse JSON
+          println(response)
           response.entity.toStrict(5.seconds).map { entity =>
-            val responseBody = entity.data.utf8String
+            val responseBody = entity.getData().utf8String
+
             println(responseBody)
-            responseBody.parseJson.convertTo[LLMResponse]
+            responseBody.parseJson.convertTo[LlmQueryResponse]
           }
         case _ =>
           // Handle error cases
