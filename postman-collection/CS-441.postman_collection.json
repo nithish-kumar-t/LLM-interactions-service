@@ -1,0 +1,18 @@
+{
+	"info": {
+		"_postman_id": "5d9ea503-59bb-4867-9c82-86947512ece9",
+		"name": "CS-441",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "10260742"
+	},
+	"item": [
+		{
+			"name": "New Request",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		}
+	]
+}
