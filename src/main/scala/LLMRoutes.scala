@@ -7,6 +7,7 @@ import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
 import JsonFormats._
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import com.typesafe.config.ConfigFactory
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
@@ -25,7 +26,8 @@ object LLMRoutes {
     val url = "https://tfz33jek7j.execute-api.us-east-2.amazonaws.com/PRODStage/queryLLM"
 
     //val llmReq : LlmQueryRequest =
-    val protoRequest : LlmQueryRequest = new LlmQueryRequest(request.input, 0)
+    val maxWords = ConfigFactory.load().getString("maxWords").toInt
+    val protoRequest : LlmQueryRequest = new LlmQueryRequest(request.input, request.maxWords)
 
     // Create HTTP request
     val httpRequest = HttpRequest(
@@ -45,7 +47,12 @@ object LLMRoutes {
             val responseBody = entity.getData().utf8String
 
             println(responseBody)
-            responseBody.parseJson.convertTo[LLMResponse]
+            val resp = responseBody.parseJson.convertTo[LLMResponse]
+            if (resp.output.split(" ").toList.size >maxWords) {
+              new LLMResponse(resp.input, resp.output.split(" ").toList.slice(0, maxWords).toList.mkString(" "))
+            } else {
+              resp
+            }
           }
         case _ =>
           // Handle error cases

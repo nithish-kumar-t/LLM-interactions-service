@@ -79,6 +79,8 @@ def lambda_handler(event, context):
         # Extract the generated text (this depends on the model's response structure)
         generated_text = response_json.get('generation', {})
 
+        # if (generated_text.split(" "))
+
         print(response_payload)
         print(response_json)
 
