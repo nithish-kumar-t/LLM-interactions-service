@@ -8,6 +8,8 @@ import protobuf.llmQuery.{LlmQueryRequest, LlmQueryResponse}
 case class LlmQueryRequestCase(input: String)
 case class LlmQueryResponseCase(output: String)
 
+case class LLMResponse(input: String, output: String)
+
 // JSON Formats
 object JsonFormats {
 
@@ -15,6 +17,9 @@ object JsonFormats {
   implicit val llmQueryRequestCaseFormat: RootJsonFormat[LlmQueryRequestCase] = jsonFormat1(LlmQueryRequestCase)
   implicit val llmQueryResponseCaseFormat: RootJsonFormat[LlmQueryResponseCase] = jsonFormat1(LlmQueryResponseCase)
 
+  implicit val LLMQueryResponse: RootJsonFormat[LLMResponse] = jsonFormat2(LLMResponse)
+
+  // Custom formats for proto-generated classes
   // Custom formats for proto-generated classes
   implicit val llmQueryRequestFormat: RootJsonFormat[LlmQueryRequest] = new RootJsonFormat[LlmQueryRequest] {
     override def write(obj: LlmQueryRequest): JsValue = {

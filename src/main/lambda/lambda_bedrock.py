@@ -16,7 +16,7 @@ from botocore.config import Config
 
 def lambda_handler(event, context):
     # Initialize Bedrock client
-    os.environ['BEDROCK_MODEL_ARN'] = 'arn:aws:bedrock:us-east-2:908027374121:inference-profile/us.meta.llama3-2-1b-instruct-v1:0'
+    os.environ['BEDROCK_MODEL_ARN'] = 'arn:aws:bedrock:us-east-2:908027374121:inference-profile/us.meta.llama3-1-8b-instruct-v1:0'
 
     config = Config(
         read_timeout=30000,  # Increased from 10 to 30 seconds
@@ -46,6 +46,7 @@ def lambda_handler(event, context):
         reqBody[k] = v.strip().strip('\"')
 
     user_input = reqBody.get('input', 'Hello, world!')
+    max_words = int(reqBody.get('maxWords', 100))
 
     bedrock_client = boto3.client(service_name='bedrock-runtime', config=config)
 
@@ -66,7 +67,7 @@ def lambda_handler(event, context):
             modelId=model_arn,
             body=json.dumps({
                 "prompt": user_input
-                # "maxTokens": 100
+                # "max_tokens_to_sample": 100
             }),
             contentType='application/json'
         )

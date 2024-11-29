@@ -18,7 +18,7 @@ import protobuf.llmQuery.{LlmQueryRequest, LlmQueryResponse}
 
 object LLMRoutes {
 
-  private def queryLLM(request: LLMRequest)(implicit system: ActorSystem): Future[LlmQueryResponse] = {
+  private def queryLLM(request: LlmQueryRequest)(implicit system: ActorSystem): Future[LLMResponse] = {
     implicit val ec = system.dispatcher
     implicit val materializer = ActorMaterializer()
 
@@ -41,11 +41,11 @@ object LLMRoutes {
         case StatusCodes.OK =>
           // Extract response body and parse JSON
           println(response)
-          response.entity.toStrict(5.seconds).map { entity =>
+          response.entity.toStrict(10.seconds).map { entity =>
             val responseBody = entity.getData().utf8String
 
             println(responseBody)
-            responseBody.parseJson.convertTo[LlmQueryResponse]
+            responseBody.parseJson.convertTo[LLMResponse]
           }
         case _ =>
           // Handle error cases
@@ -59,7 +59,7 @@ object LLMRoutes {
   def routes(implicit system: ActorSystem): Route = concat(
     path("query-llm") {
       get {
-        entity(as[LLMRequest]) { request =>
+        entity(as[LlmQueryRequest]) { request =>
           // Use onSuccess to handle the asynchronous API call
           onSuccess(queryLLM(request)) { response =>
             complete(response)
