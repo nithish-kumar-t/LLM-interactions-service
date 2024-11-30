@@ -1,6 +1,8 @@
 import org.yaml.snakeyaml.{DumperOptions, Yaml}
+
 import scala.collection.mutable.ListBuffer
-import java.io.{File, FileWriter}
+import java.io.{BufferedWriter, File, FileWriter}
+import java.time.Instant
 import scala.jdk.CollectionConverters._
 
 case class IterationResult(
@@ -10,41 +12,47 @@ case class IterationResult(
                             ollamaResponse: String
                           )
 
-
 object YAML_Helper {
   private val options = new DumperOptions
   options.setPrettyFlow(true)
-  options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK)
+  options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK) // Use block formatting for readability
 
-  def createMutableResult(): ListBuffer[Map[String, Any]] = {
+  private val yaml = new Yaml(options)
+
+  def createMutableResult(): ListBuffer[IterationResult] = {
     // List of iteration results
-    val results = ListBuffer[Map[String, Any]]()
-    results
+    ListBuffer.empty[IterationResult]
   }
 
-
-  def appendResult(results:  ListBuffer[Map[String, Any]]  , iteration : Int, question: String, llmResp: String, ollamaResp: String): Any = {
-    results += Map(
-      "Itr-"+iteration.toString -> Map(
-        "question" -> question,
-        "LLM Response" -> llmResp,
-        "Ollama Response" -> ollamaResp
-      )
-    )
+  def appendResult(
+                    results: ListBuffer[IterationResult],
+                    iteration: Int,
+                    question: String,
+                    llmResp: String,
+                    ollamaResp: String
+                  ): Unit = {
+    results += IterationResult(s"Itr-$iteration", question, llmResp, ollamaResp)
   }
 
-  def save(results: ListBuffer[Map[String, Any]]): Unit = {
-    // File to write YAML
-    val yaml = new Yaml(options)
-    val file = new File("src/main/resources/iteration_results.yaml")
-    val writer = new FileWriter(file)
+  def save(results: ListBuffer[IterationResult]): Unit = {
+    val file = new File("src/main/resources/conversation-agents/iteration_results-" + Instant.now().toString + ".yaml")
+    val writer = new BufferedWriter(new FileWriter(file))
 
     try {
-      // Dump results to YAML
-      yaml.dump(results.toList.asJava, writer)
+      results.foreach { result =>
+        val entry = Map(
+          result.iteration -> Map(
+            "question" -> result.question,
+            "LLM Response" -> result.llmResponse,
+            "Ollama Response" -> result.ollamaResponse
+          ).asJava
+        ).asJava
+        yaml.dump(entry, writer)
+      }
       println(s"YAML file created at: ${file.getAbsolutePath}")
     } finally {
       writer.close()
     }
   }
+
 }

@@ -1,4 +1,3 @@
-import AutomatedConversationalAgent.OLLAMA_QUERIES_RANGE
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
@@ -38,7 +37,7 @@ object LLMRoutes {
              Future {
               logger.info("Starting Automated Conversational Agent...")
               AutomatedConversationalAgent.start(request)
-              logger.info("Automated Conversational Agent started successfully.")
+              logger.info(s"Successfully completed the execution of the client...")
             }.onComplete{
                case Success(value) => println(s"Successfully completed the execution of the client $value")
                case Failure(ex)    => println(s"An error occurred when executing the client: $ex")
