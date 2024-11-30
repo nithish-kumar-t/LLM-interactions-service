@@ -1,95 +1,63 @@
+import AutomatedConversationalAgent.OLLAMA_QUERIES_RANGE
 import akka.actor.ActorSystem
-import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.model.headers._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import akka.stream.ActorMaterializer
 import JsonFormats._
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import org.slf4j.LoggerFactory
 
-import scala.concurrent.Future
-import scala.concurrent.duration._
+import scala.concurrent.{ExecutionContext, Future}
+import protobuf.llmQuery._
 
-// Convert request to JSON
-import spray.json._
-
-import protobuf.llmQuery.{LlmQueryRequest, LlmQueryResponse}
+import scala.util.{Failure, Success}
 
 object LLMRoutes {
   private val logger = LoggerFactory.getLogger(getClass)
+  private val OLLAMA_QUERIES_RANGE = "ollama.range"
 
-  private def queryLLM(protoRequest: LlmQueryRequest)(implicit system: ActorSystem): Future[LlmQueryResponse] = {
-    implicit val ec = system.dispatcher
-    implicit val materializer = ActorMaterializer()
+  def routes(implicit system: ActorSystem): Route = {
+    // ExecutionContext for handling Futures
+    implicit val ec: ExecutionContext = system.dispatcher
 
-    val url = ConfigLoader.getConfig("lambdaApiGateway")
-    val maxWords :Int =
-      if(protoRequest.maxWords != 0)
-        protoRequest.maxWords
-      else
-        ConfigLoader.getConfig("maxWords").toInt
-
-    // Create HTTP request
-    val httpRequest = HttpRequest(
-      method = HttpMethods.GET,
-      uri = Uri(url),
-      headers = List(`Content-Type`(ContentTypes.`application/grpc+proto`)),
-      entity = HttpEntity(ContentTypes.`application/grpc+proto`, protoRequest.toProtoString.getBytes)
-    )
-
-    // Send request and handle response
-    val responseFuture = Http().singleRequest(httpRequest).flatMap { response =>
-      response.status.intValue() match {
-        // HTTP codes with 200-299 are all happy paths,
-        case statusCode if statusCode >= 200 && statusCode < 300 =>
-          // Extract response body and parse JSON
-          logger.info(response.toString())
-          //If parsing is taking more than 5 seconds, we are halting the process
-          response.entity.toStrict(5.seconds).map { entity =>
-            val responseBody = entity.getData().utf8String
-
-            //Based on client needs, re-sizing the response
-            val resp = responseBody.parseJson.convertTo[LlmQueryResponse]
-            if (resp.output.split(" ").toList.size >maxWords) {
-              val processedResp =
-                new LlmQueryResponse(resp.input, resp.output.split(" ").toList.slice(0, maxWords).mkString(" "))
-              logger.info(processedResp.toString)
-              processedResp
-            } else {
-              logger.info(resp.toString)
-              resp
+    concat(
+      path("query-llm") {
+        get {
+          entity(as[LlmQueryRequest]) { request =>
+            // Use onSuccess to handle the asynchronous API call
+            onSuccess(ApiInvocationHelper.queryLLM(request)) { response =>
+              complete(response)
             }
           }
-        // HTTP codes with 400-499 range are client error responses., Eg: 404, wrong path, or 401, Auth error
-        // HTTP codes with 500-599 range indicate server error responses. Eg: service unavailable 503
-        case statusCode if statusCode >= 400 && statusCode <= 599  =>
-          // Handling error cases
-          val errorMsg = s"API call failed with status: ${response.status}, \n error Message: ${response.entity},"
-          logger.error(errorMsg)
-          Future.failed(new RuntimeException(errorMsg))
-      }
-    }
+        }
+      },
+      path("start-conversation-agent") {
+        get {
+          entity(as[LlmQueryRequest]) { request =>
+            // Start AutomatedConversationalAgent in a separate thread
+             Future {
+              logger.info("Starting Automated Conversational Agent...")
+              AutomatedConversationalAgent.start(request)
+              logger.info("Automated Conversational Agent started successfully.")
+            }.onComplete{
+               case Success(value) => println(s"Successfully completed the execution of the client $value")
+               case Failure(ex)    => println(s"An error occurred when executing the client: $ex")
+            }
 
-    responseFuture
-  }
-
-  def routes(implicit system: ActorSystem): Route = concat(
-    path("query-llm") {
-      get {
-        entity(as[LlmQueryRequest]) { request =>
-          // Use onSuccess to handle the asynchronous API call
-          onSuccess(queryLLM(request)) { response =>
-            complete(response)
+            // Immediately respond to the client
+            complete (
+              StatusCodes.Accepted,
+              "Conversation started, Please check for file in location " +
+                "src/main/resources/agent-resp/convestn-{timestamp}"
+            )
           }
         }
+      },
+      path("health") {
+        get {
+          complete(StatusCodes.OK, "LLM REST Service is up and running!")
+        }
       }
-    },
-    path("health") {
-      get {
-        complete(StatusCodes.OK, "LLM REST Service is up and running!")
-      }
-    }
-  )
+    )
+  }
 }

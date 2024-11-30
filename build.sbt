@@ -23,6 +23,8 @@ lazy val root = project
       "com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf",
       "org.scalatest" %% "scalatest" % "3.2.16" % Test,
       "org.slf4j" % "slf4j-simple" % "2.0.13", //  logging
+      "org.yaml" % "snakeyaml" % "1.24",              // For YAML processing
+      "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml" % "2.17.2", // Optional: Jackson for YAML
       "org.scalameta" %% "munit" % "1.0.0" % Test
     ),
 

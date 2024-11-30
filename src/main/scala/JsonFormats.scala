@@ -14,7 +14,7 @@ object JsonFormats {
   implicit val llmQueryRequestCaseFormat: RootJsonFormat[LlmQueryRequestCase] = jsonFormat2(LlmQueryRequestCase)
   implicit val llmQueryResponseCaseFormat: RootJsonFormat[LlmQueryResponseCase] = jsonFormat2(LlmQueryResponseCase)
 
-//  implicit val LLMQueryResponse: RootJsonFormat[LLMResponse] = jsonFormat2(LLMResponse)
+  // implicit val LLMQueryResponse: RootJsonFormat[LLMResponse] = jsonFormat2(LLMResponse)
 
   // Custom formats for proto-generated classes
   implicit val llmQueryRequestFormat: RootJsonFormat[LlmQueryRequest] = new RootJsonFormat[LlmQueryRequest] {
