@@ -7,7 +7,7 @@ import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
 import JsonFormats._
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-import com.typesafe.config.ConfigFactory
+import org.slf4j.LoggerFactory
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
@@ -18,16 +18,18 @@ import spray.json._
 import protobuf.llmQuery.{LlmQueryRequest, LlmQueryResponse}
 
 object LLMRoutes {
+  private val logger = LoggerFactory.getLogger(getClass)
 
-  private def queryLLM(request: LlmQueryRequest)(implicit system: ActorSystem): Future[LLMResponse] = {
+  private def queryLLM(protoRequest: LlmQueryRequest)(implicit system: ActorSystem): Future[LlmQueryResponse] = {
     implicit val ec = system.dispatcher
     implicit val materializer = ActorMaterializer()
 
-    val url = "https://tfz33jek7j.execute-api.us-east-2.amazonaws.com/PRODStage/queryLLM"
-
-    //val llmReq : LlmQueryRequest =
-    val maxWords = ConfigFactory.load().getString("maxWords").toInt
-    val protoRequest : LlmQueryRequest = new LlmQueryRequest(request.input, request.maxWords)
+    val url = ConfigLoader.getConfig("lambdaApiGateway")
+    val maxWords :Int =
+      if(protoRequest.maxWords != 0)
+        protoRequest.maxWords
+      else
+        ConfigLoader.getConfig("maxWords").toInt
 
     // Create HTTP request
     val httpRequest = HttpRequest(
@@ -39,24 +41,34 @@ object LLMRoutes {
 
     // Send request and handle response
     val responseFuture = Http().singleRequest(httpRequest).flatMap { response =>
-      response.status match {
-        case StatusCodes.OK =>
+      response.status.intValue() match {
+        // HTTP codes with 200-299 are all happy paths,
+        case statusCode if statusCode >= 200 && statusCode < 300 =>
           // Extract response body and parse JSON
-          println(response)
-          response.entity.toStrict(10.seconds).map { entity =>
+          logger.info(response.toString())
+          //If parsing is taking more than 5 seconds, we are halting the process
+          response.entity.toStrict(5.seconds).map { entity =>
             val responseBody = entity.getData().utf8String
 
-            println(responseBody)
-            val resp = responseBody.parseJson.convertTo[LLMResponse]
+            //Based on client needs, re-sizing the response
+            val resp = responseBody.parseJson.convertTo[LlmQueryResponse]
             if (resp.output.split(" ").toList.size >maxWords) {
-              new LLMResponse(resp.input, resp.output.split(" ").toList.slice(0, maxWords).toList.mkString(" "))
+              val processedResp =
+                new LlmQueryResponse(resp.input, resp.output.split(" ").toList.slice(0, maxWords).mkString(" "))
+              logger.info(processedResp.toString)
+              processedResp
             } else {
+              logger.info(resp.toString)
               resp
             }
           }
-        case _ =>
-          // Handle error cases
-          Future.failed(new RuntimeException(s"API call failed with status: ${response.status}"))
+        // HTTP codes with 400-499 range are client error responses., Eg: 404, wrong path, or 401, Auth error
+        // HTTP codes with 500-599 range indicate server error responses. Eg: service unavailable 503
+        case statusCode if statusCode >= 400 && statusCode <= 599  =>
+          // Handling error cases
+          val errorMsg = s"API call failed with status: ${response.status}, \n error Message: ${response.entity},"
+          logger.error(errorMsg)
+          Future.failed(new RuntimeException(errorMsg))
       }
     }
 

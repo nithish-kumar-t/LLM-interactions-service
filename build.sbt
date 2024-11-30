@@ -22,6 +22,7 @@ lazy val root = project
       "com.thesamet.scalapb" %% "scalapb-json4s" % "0.11.0",
       "com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf",
       "org.scalatest" %% "scalatest" % "3.2.16" % Test,
+      "org.slf4j" % "slf4j-simple" % "2.0.13", //  logging
       "org.scalameta" %% "munit" % "1.0.0" % Test
     ),
 
