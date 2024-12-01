@@ -58,7 +58,7 @@ object YAML_Helper {
    * @param results A mutable list of iteration results to be saved.
    *                Each result is converted into YAML format and written to a file.
    */
-  def save(results: ListBuffer[IterationResult]): Unit = {
+  def save(results: ListBuffer[IterationResult], totalInteractions:Int, totalTimeSeconds : Long, terminationCondition: String): Unit = {
     val file = new File("src/main/resources/conversation-agents/iteration_results-" + Instant.now().toString + ".yaml")
     val writer = new BufferedWriter(new FileWriter(file))
 
@@ -74,6 +74,18 @@ object YAML_Helper {
         ).asJava
         yaml.dump(entry, writer)
       }
+
+      //Add statistics to the beginning of the file
+      val statistics = Map(
+        "statistics" -> Map(
+          "total_interactions" -> totalInteractions,
+          "total_time_seconds" -> totalTimeSeconds,
+          "termination_condition" -> terminationCondition
+        ).asJava
+      ).asJava
+      yaml.dump(statistics, writer)
+
+
       logger.info(s"YAML file created at: ${file.getAbsolutePath}")
     } finally {
       writer.close() // Ensure the writer is closed after the file is written

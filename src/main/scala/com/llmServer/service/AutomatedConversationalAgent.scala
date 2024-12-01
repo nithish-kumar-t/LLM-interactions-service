@@ -24,6 +24,7 @@ object AutomatedConversationalAgent {
   private val OLLAMA_REQUEST_TIMEOUT = "ollama.request-timeout-seconds"
   private val OLLAMA_MODEL = "ollama.model"
   private val OLLAMA_QUERIES_RANGE = "ollama.range"
+  private val TERMINATION_CONDITION = "Maximum Interactions Reached"
 
   // Prefixes for query generation
   private val LLAMA_PREFIX = "how can you respond to the statement "
@@ -60,6 +61,7 @@ object AutomatedConversationalAgent {
    */
   def start(protoRequest: LlmQueryRequest)(implicit system: ActorSystem): Unit = {
     // Initialize Ollama API
+    val epochStartTime = System.currentTimeMillis()
     val llamaAPI = new OllamaAPI(ConfigLoader.getConfig(OLLAMA_HOST))
     llamaAPI.setRequestTimeoutSeconds(ConfigLoader.getConfig(OLLAMA_REQUEST_TIMEOUT).toLong)
     val llamaModel = ConfigLoader.getConfig(OLLAMA_MODEL)
@@ -101,7 +103,8 @@ object AutomatedConversationalAgent {
       }
     }
 
+    val duration = (System.currentTimeMillis() - epochStartTime)/1000 // to get duration in seconds
     // Save all the conversation results to a YAML file
-    YAML_Helper.save(results)
+    YAML_Helper.save(results, range, duration, TERMINATION_CONDITION)
   }
 }
