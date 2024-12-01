@@ -25,7 +25,8 @@ lazy val root = project
       "com.typesafe.akka" %% "akka-http-testkit" % "10.2.10" % Test, // Akka test
       "com.typesafe.akka" %% "akka-testkit" % "2.6.20" % Test,
       "org.slf4j" % "slf4j-simple" % "2.0.13", //  logging
-      "org.yaml" % "snakeyaml" % "1.24",              // For YAML processing
+      "org.yaml" % "snakeyaml" % "1.24",              // For YAML processing,
+      "software.amazon.awssdk" % "s3" % "2.25.27", //s3 util
       "org.mockito" %% "mockito-scala" % "1.17.14",
       "org.mockito" %% "mockito-scala-scalatest" % "1.17.12" % Test,
       "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml" % "2.17.2", // Optional: Jackson for YAML

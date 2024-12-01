@@ -13,9 +13,9 @@ import scala.concurrent.ExecutionContextExecutor
  * and binds routes defined in the `LLMRoutes` object.
  */
 object LLMServer extends App {
-  if (!this.args.isEmpty && this.args(0).equals("local")) {
-    println("Environment is------local")
-    ConfigLoader.setConfig("local")
+  if (!this.args.isEmpty) {
+    println(s"Environment is------${this.args(0)}")
+    ConfigLoader.setConfig(this.args(0))
   } else {
     println("Environment is------docker")
     ConfigLoader.setConfig("docker")

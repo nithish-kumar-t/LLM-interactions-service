@@ -26,6 +26,12 @@ object ConfigLoader {
     configMap.put("conversationPath", config.getString(s"$env.conversationPath"))
     configMap.put("server", config.getString(s"$env.server"))
 
+    if (env.equals("cloud")) {
+      configMap.put("aws.region", config.getString(s"$env.region"))
+      configMap.put("aws.access-key", config.getString(s"$env.access-key"))
+      configMap.put("aws.secret-key", config.getString(s"$env.secret-key"))
+    }
+
     logger.info(configMap.mkString("\n"))
   }
 
