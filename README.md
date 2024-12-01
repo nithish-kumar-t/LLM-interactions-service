@@ -14,71 +14,34 @@ This project focused on developing a conversational agent using a microservice-b
 ##  Project structure
 ### This Project is continuation of HomeWork-2 where we trained the model and added context to for generating sentences.
 
-1. **This project consists of 2 parts**:
+1. **Microservice Implementation:**:
 
-   a. First is a simple microservice using Akka Http in scala, for clients to interact with the LLM
+   a. **Framework:** Akka HTTP in Scala for creating RESTful endpoints.
+   b. **Functionality:** Handles client interactions, processes queries, and communicates with the LLM backend via gRPC and AWS Lambda.
 
-   b. Second is a AWS Lambda function, where the bedrock code will be residing.
+2. **AWS Lambda Function:**
+   a. **Purpose:** Hosts the backend LLM logic, utilizing Amazon Bedrock or other preferred models.
 
-2. For the first part we are
+   b. **Integration:** Invoked by the microservice through AWS API Gateway using gRPC.
 
 
-### 1. Environment and Configuration Setup
-   - Loads environment-specific configurations for training and text generation, including settings such as the number of epochs, batch size, learning rate, input/output paths, etc.
-   - Supports configuration for both local (local file system) and cloud (Amazon S3) environments.
+### LLM Server API's
 
-### 2. Data Loading and Preparation
-   - Loads the input text data into an RDD (Resilient Distributed Dataset) in Spark.
-   - Applies preprocessing steps to trim whitespace, filter out empty lines, and cache the data to optimize performance.
-   - For cloud environments, reads data directly from S3 buckets; otherwise, reads from the local file system.
-   - Dataset used for training the model [Wikipedia Text](https://huggingface.co/datasets/Daniel-Saeedi/wikipedia/blob/main/wikipedia-10.txt).
+**Conversation agent:**
+```
+curl -X GET \
+  http://localhost:8080/start-conversation-agent \                                                              
+  -H "Content-Type: application/json" \
+  -d '{"input": "A slow blink from a cat is like a", "maxWords": 100}'
+```
 
-   **Intermediate Result**: A preprocessed, cached RDD containing lines of text, ready for tokenization and training.
+**LLM Server:**
+```
+  http://localhost:8080/query-llm \               
+  -H "Content-Type: application/json" \
+  -d '{"input": "A slow blink from a cat is like a", "maxWords": 50}'
 
-### 3. Tokenizer Setup
-   - The `Tokenizer` class tokenizes text into sequences of indices, mapping each word to a unique integer.
-   - This encoding prepares the text data for feeding into the neural network.
-
-   **Intermediate Result**: A `Tokenizer` instance that can encode words into integer sequences and decode integer sequences back into words.
-
-### 4. Training Data Splitting
-   - Splits the tokenized RDD into training and validation sets.
-   - Generates training samples by creating context windows (sequences of words) and corresponding target words using a sliding window approach.
-
-   **Intermediate Result**: Two RDDs (one for training and another for validation) with samples consisting of input sequences (context windows) and their corresponding target words, 80% is used for training and 20% for validating.
-
-### 5. Model Initialization and Serialization
-   - Builds and initializes a neural network model (MultiLayerNetwork) with a specific configuration.
-   - Serializes the model into a byte array format for broadcasting across Spark workers.
-
-   **Intermediate Result**: A serialized version of the initialized model, ready to be distributed for training.
-
-### 6. Distributed Training Process
-   - Conducts training in parallel across Spark partitions, with each partition holding a portion of the training samples.
-   - For each epoch:
-      - Deserializes the model for use within each partition.
-      - Processes batches by feeding sequences and targets into the model, which calculates loss and adjusts weights.
-      - Logs metrics such as loss, accuracy, and memory usage for each epoch.
-      - At the end of each epoch, averages models from all partitions to update the main model.
-
-   **Intermediate Result**: Accumulated metrics (e.g., average loss, accuracy) and an updated model after each epoch. Metrics are stored in a buffer for eventual logging or saving.
-
-### 7. Text Generation using the Trained Model
-   - After training, the model generates new sentences based on an initial seed text.
-   - Uses a temperature-based sampling method for controlled randomness in word selection.
-
-   **Intermediate Result**: Generated sentences based on the seed text, stored as a single string.
-
-### 8. Saving Results
-   - Saves all intermediate metrics (stored in a buffer) and the generated text to the specified output location.
-   - Writes results to S3 in cloud environments or to the local file system otherwise.
-
-   **Final Output**:
-   - A CSV file with metrics across epochs (e.g., loss, accuracy, epoch duration).
-   - A text file with the generated sentences based on the seed text.
-
-<img width="1286" alt="image" src="https://github.com/user-attachments/assets/e79f3e3c-3ad0-4773-b7fe-c285114fe46e">
-
+```
 
 
 
@@ -91,6 +54,7 @@ This project focused on developing a conversational agent using a microservice-b
 - **Protobuf**
 - **Java**
 - **Amazon S3** (passkeys are required for doing S3 file IO from local environment)
+
 
 ### Usage
 Run this project by starting the server in local
@@ -123,30 +87,24 @@ sbt clean compile test
 1) Clone this repository
 ```
 git clone git@github.com:nithish-kumar-t/LLM-interactions-service.git
+
 ```
-
-
 2) cd to the Project
 ```
 cd LLM-interactions-service
 ```
+
 3) update the jars
 ```
 sbt clean update
 ```
 
-4) Create fat jat using assembly
-```
-sbt assembly
-# This will create a fat Jar
-```
-
-5) we can then run UT's and FT's using below
+4) we can then run UT's and FT's using below
 ```
 sbt test
 ```
 
-6) SBT application can contain multiple mains, this project has 2, so to check the correct main
+5) SBT application can contain multiple mains, this project has 2, so to check the correct main
 ```
 ➜LLM-decoder-using-spark git:(feature) ✗ sbt
 [info] started sbt server
@@ -170,11 +128,39 @@ sbt:LLM-hw2-jar>
 
 3. **Protobuf**: Ensure that you have the google protobuf module downloaded in the 
 
-4. **Scala, Java and Spark**: Make sure Scala, Java and Hadoop (Scala 2.13.13, Java 11.0.25 Ollama: llama3.2)   are installed and configured correctly.
+4. **Scala, Java and Spark**: Make sure Scala, Java and Hadoop (Scala 2.13.13, Java 11.0.25 Ollama: 1.0.79)   are installed and configured correctly.
 
-5. **Git and GitHub**: Use Git for version control and host your project repository on GitHub.
+5. Install Ollama and Download Models 
+   Sign Up for Ollama: Create an account on Ollama if you haven't already.
+   Install Ollama Local Server: Follow the Ollama Installation Guide.
+   Download a Model: For example, download llama3:latest.
+```
+bash
+Copy code
+ollama pull llama3:latest
+```
 
-6. **IDE**: Use an Integrated Development Environment (IDE) for coding and development.
+6. **Git and GitHub**: Use Git for version control and host your project repository on GitHub.
+
+7. Configure Application Settings
+
+Update the application.conf file with your Ollama and AWS configurations.
+
+```
+ollama {
+  host = "http://localhost:11434"
+  model = "llama3:latest"
+  request-timeout-seconds = 500
+}
+
+aws {
+  region = "your-aws-region"
+  access-key = "YOUR_AWS_ACCESS_KEY"
+  secret-key = "YOUR_AWS_SECRET_KEY"
+}
+```
+
+8. **IDE**: Use an Integrated Development Environment (IDE) for coding and development.
 
 
 
