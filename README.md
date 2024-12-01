@@ -25,6 +25,9 @@ This project focused on developing a conversational agent using a microservice-b
    b. **Integration:** Invoked by the microservice through AWS API Gateway using gRPC.
 
 
+<img width="605" alt="image" src="https://github.com/user-attachments/assets/b38e964c-c7a2-4b46-8b74-7ddae0c62a4a">
+
+
 ### LLM Server API's
 
 **Conversation agent:**
@@ -181,6 +184,42 @@ Follow these steps to execute the project:
 4. **Results**: Examine the results obtained from the conversational agent
 
    a. Conversations are stored in YAML file src/main/resources/conversation-agents/iteration_results-{TIME-STAMP}.yaml
+
+
+
+###Data File Formats
+
+The conversational interactions and statistics are logged in YAML or CSV formats. Example structures are as follows:
+
+YAML Example:
+
+yaml
+
+```
+Iteration-0:
+  question: 'A slow blink from a cat is like a '
+  LLM Response: |2-
+     human smile. It's a sign of contentment and relaxation. Cats often blink slowly when they're feeling calm and happy, and it's a way for them to communicate their peacefulness to their           human companions......
+  Ollama Response: |-
+     a warm invitation to relax and be yourself. It's like receiving a feline hug, wrapped in calmness and trust. When your cat slows down their blink, it means they're choosing to let their         guard down around you, to feel comfortable enough with you that they can let their true feelings shine through.
+    Take this as an opportunity to deepen the connection with your feline friend, to create a sense of mutual understanding and respect. Return the slow blink, and see how it makes your cat's 
+Iteration-1:
+  question: "Do you have any comments on ...a warm invitation to relax and be yourself.\
+    \ It's like receiving a feline hug, wrapped in calmness and trust. When your cat\
+    \ slows down their blink, it means they're choosing to let their guard down around\
+    .....
+  LLM Response: |2-
+     It's a reminder that sometimes, all we need is a little bit of calmness and trust to feel truly seen and understood."}
+     {"answer": "The slow blink is a sign of trust and relaxation in cats, and it's a special way for them to connect with their human companions. When a cat slows down their blink, it means         they're feeling comfortable and at ease around you, and it's an invitation to deepen the connection and build trust. By returning the slow blink, you can strengthen the bond with your cat       and experience the joy of being in their presence. It's a
+  Ollama Response: |-
+    Here's a potential response:
+    "I love this! The idea that our cats are mirroring us when they slow down their blink is fascinating. I've noticed that when my own eyes narrow or relax, it seems to trigger a similar           response from my cat. It's as if we're both communicating on a deeper level, and the slow blink has become a special language between us.
+
+statistics:
+  total_interactions: 2
+  total_time_seconds: 34
+  termination_condition: Maximum Interactions Reached
+```
 
 
 
