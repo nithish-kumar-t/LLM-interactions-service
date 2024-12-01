@@ -97,22 +97,38 @@ sbt clean compile test
 git clone git@github.com:nithish-kumar-t/LLM-interactions-service.git
 
 ```
-2) cd to the Project
+2)  **Scala, Java and Llama**: Make sure Scala, Java and Hadoop (Scala 2.13.13, Java 11.0.25 Ollama: 1.0.79)   are installed and configured correctly.
+
+3) cd to the Project
 ```
 cd LLM-interactions-service
 ```
+4) Start the Ollama Server
 
-3) update the jars
 ```
-sbt clean update
+ollama serve
 ```
 
-4) we can then run UT's and FT's using below
+5) update the jars
+```
+sbt clean compile
+```
+
+7) we can then run UT's and FT's using below
 ```
 sbt test
 ```
 
-5) SBT application can contain multiple mains, this project has 2, so to check the correct main
+8) To start the application open LLMServer FIle and click Edit configuration and add cli arguments as **local**
+<img width="793" alt="image" src="https://github.com/user-attachments/assets/9d4485f4-06c9-4d52-97a9-84373f968a0b">
+
+9) If above is not working then run the Jar, by passsing environment as local
+```
+java -jar target/scala-2.13/LLM-hw3-assembly-0.1.0-SNAPSHOT.jar local
+```
+
+
+10) SBT application can contain multiple mains, this project has 2, so to check the correct main
 ```
 ➜LLM-decoder-using-spark git:(feature) ✗ sbt
 [info] started sbt server
@@ -124,8 +140,8 @@ sbt:LLM-hw2-jar>
 ```
 
 
-## Running the Project in AWS
-
+<!---
+## Running the Project in aws
 
 
 ## Prerequisites
@@ -146,11 +162,13 @@ sbt:LLM-hw2-jar>
 bash
 Copy code
 ollama pull llama3:latest
+ollama pull llama3.2
 ```
 
 6. **Git and GitHub**: Use Git for version control and host your project repository on GitHub.
 
-7. Configure Application Settings
+7. Start the server with environment variables
+-->
 
 Update the application.conf file with your Ollama and AWS configurations.
 
@@ -226,7 +244,52 @@ statistics:
   termination_condition: Maximum Interactions Reached
 ```
 
+## Steps to Running the Project in Docker
 
+
+### 1. Install Docker
+- Download docker [Docker's official website](https://www.docker.com/).
+
+### 2. Set Up Ollama Container, execute below steps
+
+```
+1. Pull the Ollama container:
+   docker pull ollama/ollama
+   
+⁠ 2. Run the Ollama container:
+    docker run -d -p 11434:11434 --name ollama-container ollama/ollama
+   
+⁠ 3. Access the container and Install Ollama version 3.2:
+    docker exec -it ollama-container bash
+    ollama pull llama3.2
+```
+
+### 3. Build the sbt Application
+1. Create the JAR file using `sbt`:
+   ```
+   sbt assembly
+   ```
+   
+⁠ 2. Build the Docker image:
+   
+   ```
+   docker build -t cs-441-LLM-interaction-service .
+   ```
+ 3. Ensure jar is accessible from cmd
+   ```
+   java -jar target/scala-2.13/LLM-hw3-assembly-0.1.0-SNAPSHOT.jar local
+   ```
+
+
+### 4. Run the Dockerized Application
+- Start the application container, linking it with the Ollama container:
+```
+  docker run -d -p 8080:8080 --name cs-441-LLM-container --link ollama-container cs-441-LLM-interaction-service
+```
+  
+⁠ ---
+
+** We can run the docker from postman or by curl requests.
 
 ## Unit / Regression Testing
 
