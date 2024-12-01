@@ -6,6 +6,8 @@ import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
+import com.llmServer.controller.LLMRoutes
+
 import scala.concurrent.duration._
 
 class LLMRouterTest extends AnyWordSpec with Matchers with ScalatestRouteTest {

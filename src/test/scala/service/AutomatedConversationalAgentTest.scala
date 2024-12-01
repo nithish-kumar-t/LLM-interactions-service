@@ -1,5 +1,6 @@
 package service
 
+import com.llmServer.service.AutomatedConversationalAgent
 import org.mockito.MockitoSugar
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 import protobuf.llmQuery.LlmQueryRequest

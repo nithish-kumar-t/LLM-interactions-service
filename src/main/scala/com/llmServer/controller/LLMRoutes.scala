@@ -1,14 +1,17 @@
+package com.llmServer.controller
+
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import com.llmServer.service.{AutomatedConversationalAgent}
 import org.slf4j.LoggerFactory
-import util.JsonFormats._
+import com.llmServer.util.JsonFormats._
 
 import scala.concurrent.{ExecutionContext, Future}
 import protobuf.llmQuery._
-import service.{AutomatedConversationalAgent, LambdaInvocationService}
+import service.LambdaInvocationService
 
 import scala.util.{Failure, Success}
 

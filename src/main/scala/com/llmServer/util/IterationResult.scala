@@ -1,4 +1,4 @@
-package util
+package com.llmServer.util
 
 import org.slf4j.LoggerFactory
 import org.yaml.snakeyaml.{DumperOptions, Yaml}

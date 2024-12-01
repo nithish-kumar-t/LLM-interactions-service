@@ -1,4 +1,4 @@
-package util
+package com.llmServer.util
 
 import protobuf.llmQuery.{LlmQueryRequest, LlmQueryResponse}
 import spray.json.DefaultJsonProtocol._

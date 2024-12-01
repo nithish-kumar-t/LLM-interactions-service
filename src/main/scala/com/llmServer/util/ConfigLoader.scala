@@ -1,4 +1,4 @@
-package util
+package com.llmServer.util
 
 import com.typesafe.config.{Config, ConfigFactory}
 

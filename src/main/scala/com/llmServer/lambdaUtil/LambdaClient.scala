@@ -1,4 +1,4 @@
-package lambdaUtil
+package com.llmServer.lambdaUtil
 
 import software.amazon.awssdk.core.SdkBytes
 import software.amazon.awssdk.services.lambda.LambdaClient

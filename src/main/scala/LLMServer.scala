@@ -1,6 +1,7 @@
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
+import com.llmServer.controller.LLMRoutes
 
 import scala.concurrent.ExecutionContextExecutor
 import scala.io.StdIn
