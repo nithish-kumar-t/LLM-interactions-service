@@ -11,6 +11,10 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.jdk.CollectionConverters._
 
+/**
+ * `AutomatedConversationalAgent` is a service that facilitates automated conversations
+ * by invoking a Lambda LLM (Language Model) and Ollama API in sequence.
+ */
 object AutomatedConversationalAgent {
   private val logger = LoggerFactory.getLogger(getClass)
 
@@ -24,9 +28,14 @@ object AutomatedConversationalAgent {
   private val LLAMA_PREFIX = "how can you respond to the statement "
   private val LLAMA_TO_LAMBDA_PREFIX = "Do you have any comments on "
 
+  /**
+   * This function is mainly for test purpose.
+   *
+   * @param args Command-line arguments, where the first argument is expected to be the seed text.
+   */
   def main(args: Array[String]): Unit = {
     if (args.isEmpty) {
-      logger.error("input seed text not passed")
+      logger.error("Input seed text not passed.")
     } else {
       val seedText = args(0)
       val protoRequest: LlmQueryRequest = new LlmQueryRequest(seedText, 100)
@@ -42,9 +51,14 @@ object AutomatedConversationalAgent {
     }
   }
 
+  /**
+   * Starts the conversational agent by iteratively interacting with Lambda LLM and Ollama APIs.
+   *
+   * @param protoRequest Initial request containing the seed text and other parameters.
+   * @param system Implicit `ActorSystem` for asynchronous operations.
+   */
   def start(protoRequest: LlmQueryRequest)(implicit system: ActorSystem): Unit = {
     // Initialize Ollama API
-
     val llamaAPI = new OllamaAPI(ConfigLoader.getConfig(OLLAMA_HOST))
     llamaAPI.setRequestTimeoutSeconds(ConfigLoader.getConfig(OLLAMA_REQUEST_TIMEOUT).toLong)
     val llamaModel = ConfigLoader.getConfig(OLLAMA_MODEL)
@@ -53,16 +67,16 @@ object AutomatedConversationalAgent {
     val results = YAML_Helper.createMutableResult()
     var nextRequest = protoRequest
 
-    // Use sequence to ensure synchronous execution
+    // Iteratively process queries and responses
     Iterator.range(0, range).foreach { itr =>
       try {
         // Synchronously wait for the LLM query to complete
-        this.synchronized{
+        this.synchronized {
           val response = Await.result(LambdaInvocationService.queryLLM(nextRequest), 15.seconds)
           val input = nextRequest.input + " "
           val output = response.output
 
-          // Synchronously generate Llama response
+          // Generate a response using the Ollama API
           val llamaResult = llamaAPI.generate(
             llamaModel,
             LLAMA_PREFIX + input + output,
@@ -74,11 +88,10 @@ object AutomatedConversationalAgent {
           logger.info(llamaResp)
           YAML_Helper.appendResult(results, itr, input, output, llamaResp)
 
-          // Prepare next request for the next iteration
+          // Prepare the next request for the next iteration
           nextRequest = new LlmQueryRequest(LLAMA_TO_LAMBDA_PREFIX + llamaResp, 100)
 
-          // Return the result if needed
-          logger.info("*****************************")
+          logger.info("Iteration completed successfully.")
         }
       } catch {
         case e: Exception =>
@@ -87,8 +100,7 @@ object AutomatedConversationalAgent {
       }
     }
 
-    //After all the interactions with ollama,we are storing those conversations into a YAML file.
+    // Save all the conversation results to a YAML file
     YAML_Helper.save(results)
   }
-
 }

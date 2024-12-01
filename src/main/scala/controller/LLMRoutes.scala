@@ -12,40 +12,61 @@ import service.{AutomatedConversationalAgent, LambdaInvocationService}
 
 import scala.util.{Failure, Success}
 
+/**
+ * `LLMRoutes` object defines HTTP routes for interacting with a language model.
+ * It includes endpoints for querying the language model, starting a conversational agent,
+ * and checking the health of the service.
+ */
 object LLMRoutes {
   private val logger = LoggerFactory.getLogger(getClass)
-  private val OLLAMA_QUERIES_RANGE = "ollama.range"
 
+  /**
+   * Defines HTTP routes for the LLM service.
+   *
+   * @param system Implicit ActorSystem for managing actor lifecycle.
+   * @return Route object representing all HTTP endpoints.
+   */
   def routes(implicit system: ActorSystem): Route = {
-    // ExecutionContext for handling Futures
+    // ExecutionContext for handling asynchronous operations
     implicit val ec: ExecutionContext = system.dispatcher
 
     concat(
+      /**
+       * Endpoint: POST /query-llm
+       * Handles a request to query the language model. Accepts a JSON payload with input text
+       * and parameters, processes the query asynchronously, and returns the result.
+       */
       path("query-llm") {
         post {
           entity(as[LlmQueryRequest]) { request =>
-            // Use onSuccess to handle the asynchronous API call
+            // Asynchronously handle the LLM query
             onSuccess(LambdaInvocationService.queryLLM(request)) { response =>
-              complete(response)
+              complete(response) // Return the LLM response as JSON
             }
           }
         }
       },
+
+      /**
+       * Endpoint: POST /start-conversation-agent
+       * Initiates a conversation agent using the provided input. The agent runs asynchronously
+       * in a separate thread, and an immediate acknowledgment response is sent back to the client.
+       */
       path("start-conversation-agent") {
         post {
           entity(as[LlmQueryRequest]) { request =>
-            // Start AutomatedConversationalAgent in a separate thread
+            // Start the Automated Conversational Agent in a separate thread
             Future {
               logger.info("Starting Automated Conversational Agent...")
               AutomatedConversationalAgent.start(request)
               logger.info(s"Successfully completed the execution of the client...")
-            }.onComplete{
+            }.onComplete {
               case Success(value) => println(s"Successfully completed the execution of the client $value")
               case Failure(ex)    => println(s"An error occurred when executing the client: $ex")
             }
 
-            // Immediately respond to the client
-            complete (
+            // Send an immediate acknowledgment response
+            complete(
               StatusCodes.Accepted,
               "Conversation started, Please check for file in location " +
                 "src/main/resources/agent-resp/convestn-{timestamp}"
@@ -53,9 +74,14 @@ object LLMRoutes {
           }
         }
       },
+
+      /**
+       * Endpoint: GET /health
+       * Provides a health check endpoint to verify that the LLM service is up and running.
+       */
       path("health") {
         get {
-          complete(StatusCodes.OK, "LLM REST Service is up and running!")
+          complete(StatusCodes.OK, "LLM REST Service is up and running!") // Respond with a success message
         }
       }
     )

@@ -5,6 +5,11 @@ import akka.stream.ActorMaterializer
 import scala.concurrent.ExecutionContextExecutor
 import scala.io.StdIn
 
+/**
+ * LLMServer initializes and starts an HTTP server for handling requests related to
+ * language model queries and conversational agents. The server runs on localhost
+ * and binds routes defined in the `LLMRoutes` object.
+ */
 object LLMServer extends App {
   implicit val system: ActorSystem = ActorSystem("LLMServerSystem")
   implicit val materializer: ActorMaterializer = ActorMaterializer()
