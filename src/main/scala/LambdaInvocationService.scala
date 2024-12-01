@@ -1,7 +1,6 @@
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.model.headers._
 import akka.stream.ActorMaterializer
 import JsonFormats._
 import org.slf4j.LoggerFactory
@@ -13,7 +12,7 @@ import scala.concurrent.duration._
 import spray.json._
 
 import protobuf.llmQuery.{LlmQueryRequest, LlmQueryResponse}
-object ApiInvocationHelper {
+object LambdaInvocationService {
   private val logger = LoggerFactory.getLogger(getClass)
 
   def queryLLM(protoRequest: LlmQueryRequest)(implicit system: ActorSystem): Future[LlmQueryResponse] = {
@@ -27,12 +26,17 @@ object ApiInvocationHelper {
       else
         ConfigLoader.getConfig("maxWords").toInt
 
+    // HTTP Entity
+    val httpEntity = HttpEntity.Strict(
+      ContentTypes.`application/grpc+proto`,
+      akka.util.ByteString(protoRequest.toProtoString.getBytes)
+    )
+
     // Create HTTP request
     val httpRequest = HttpRequest(
       method = HttpMethods.GET,
       uri = Uri(url),
-      headers = List(`Content-Type`(ContentTypes.`application/grpc+proto`)),
-      entity = HttpEntity(ContentTypes.`application/grpc+proto`, protoRequest.toProtoString.getBytes)
+      entity = httpEntity
     )
 
     // Send request and handle response
@@ -41,7 +45,7 @@ object ApiInvocationHelper {
         // HTTP codes with 200-299 are all happy paths,
         case statusCode if statusCode >= 200 && statusCode < 300 =>
           // Extract response body and parse JSON
-          logger.info(response.toString())
+          logger.info(response.headers.toString())
           //If parsing is taking more than 5 seconds, we are halting the process
           response.entity.toStrict(5.seconds).map { entity =>
             val responseBody = entity.getData().utf8String

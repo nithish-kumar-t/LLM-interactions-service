@@ -1,17 +1,9 @@
-# import json
-
-# def lambda_handler(event, context):
-#     # TODO implement
-#     return {
-#         'statusCode': 200,
-#         'body': json.dumps('Hello from Lambda!')
-#     }
-
 import json
 import boto3
 import os
 import base64
 from botocore.config import Config
+import llmQuery_pb2
 
 
 def lambda_handler(event, context):
@@ -79,17 +71,21 @@ def lambda_handler(event, context):
         # Extract the generated text (this depends on the model's response structure)
         generated_text = response_json.get('generation', {})
 
-        # if (generated_text.split(" "))
-
         print(response_payload)
         print(response_json)
 
+        llm_response = llmQuery_pb2.LlmQueryResponse()
+        llm_response.input = user_input
+        llm_response.output = generated_text
+        serialized_response = llm_response.SerializeToString()
+
         return {
             'statusCode': 200,
-            'body': json.dumps({
-                'input': user_input,
-                'output': generated_text
-            })
+            'body': serialized_response,
+            'isBase64Encoded': True,
+            'headers': {
+                'Content-Type': 'application/grpc+proto'
+            }
         }
 
     except Exception as e:

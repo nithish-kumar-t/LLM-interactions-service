@@ -13,7 +13,6 @@ import scala.util.{Failure, Success}
 
 object LLMRoutes {
   private val logger = LoggerFactory.getLogger(getClass)
-  private val OLLAMA_QUERIES_RANGE = "ollama.range"
 
   def routes(implicit system: ActorSystem): Route = {
     // ExecutionContext for handling Futures
@@ -24,7 +23,7 @@ object LLMRoutes {
         get {
           entity(as[LlmQueryRequest]) { request =>
             // Use onSuccess to handle the asynchronous API call
-            onSuccess(ApiInvocationHelper.queryLLM(request)) { response =>
+            onSuccess(LambdaInvocationService.queryLLM(request)) { response =>
               complete(response)
             }
           }

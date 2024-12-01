@@ -13,7 +13,7 @@ object LambdaHandle {
       .build()
 
     // Define the Lambda function name
-    val functionName = "YourLambdaFunctionName"
+    val functionName = "grpc-to-lambda"
 
     // Create the payload (e.g., JSON string)
     val payload = """{"key1": "value1", "key2": "value2"}"""

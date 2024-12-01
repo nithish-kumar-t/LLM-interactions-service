@@ -4,9 +4,8 @@ import io.github.ollama4j.OllamaAPI
 import io.github.ollama4j.utils.Options
 import org.slf4j.LoggerFactory
 
-import scala.concurrent.{Await, Future}
+import scala.concurrent.Await
 import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.jdk.CollectionConverters._
 
 object AutomatedConversationalAgent {
@@ -50,15 +49,15 @@ object AutomatedConversationalAgent {
     val range = ConfigLoader.getConfig(OLLAMA_QUERIES_RANGE).toInt
 
     val results = YAML_Helper.createMutableResult()
-    var currentRequest = protoRequest
+    var nextRequest = protoRequest
 
     // Use sequence to ensure synchronous execution
     Iterator.range(0, range).foreach { itr =>
       try {
         // Synchronously wait for the LLM query to complete
         this.synchronized{
-          val response = Await.result(ApiInvocationHelper.queryLLM(currentRequest), 10.seconds)
-          val input = currentRequest.input + " "
+          val response = Await.result(LambdaInvocationService.queryLLM(nextRequest), 15.seconds)
+          val input = nextRequest.input + " "
           val output = response.output
 
           // Synchronously generate Llama response
@@ -70,17 +69,15 @@ object AutomatedConversationalAgent {
           )
           val llamaResp = llamaResult.getResponse
 
-          println(llamaResp)
+          logger.info(llamaResp)
           YAML_Helper.appendResult(results, itr, input, output, llamaResp)
 
           // Prepare next request for the next iteration
-          currentRequest = new LlmQueryRequest(LLAMA_TO_LAMBDA_PREFIX + llamaResp, 100)
+          nextRequest = new LlmQueryRequest(LLAMA_TO_LAMBDA_PREFIX + llamaResp, 100)
 
           // Return the result if needed
-          println("****************")
-          // println(itr, input, output, llamaResp)
+          logger.info("*****************************")
         }
-        // (itr, input, output, llamaResp)
       } catch {
         case e: Exception =>
           logger.error(s"PROCESS FAILED at iteration $itr: ${e.getMessage}", e)
@@ -88,20 +85,8 @@ object AutomatedConversationalAgent {
       }
     }
 
-    // Wait for all futures to complete
-    try {
-//      val finalResults = Await.result(Future.sequence(sequencedFutures), (range * 10).seconds)
-//      logger.info(s"Completed ${finalResults.size} iterations")
-    } catch {
-      case e: Exception =>
-        logger.error(s"Error in processing: ${e.getMessage}", e)
-    } finally {
-      YAML_Helper.save(results)
-    }
+    //After all the interactions with ollama,we are storing those conversations into a YAML file.
+    YAML_Helper.save(results)
   }
-
-//  def helper() : Unit = {
-//
-//  }
 
 }
