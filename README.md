@@ -25,7 +25,9 @@ This project focused on developing a conversational agent using a microservice-b
    b. **Integration:** Invoked by the microservice through AWS API Gateway using gRPC.
 
 
-<img width="660" alt="image" src="https://github.com/user-attachments/assets/4f12548e-3f29-4449-9b9c-895c6cb0a6ee">
+![image](https://github.com/user-attachments/assets/5cab5b98-ee1f-4e9d-b26c-b3cc4518b7b6)
+
+
 
 
 
