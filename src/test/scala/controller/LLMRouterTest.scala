@@ -5,12 +5,15 @@ import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-
 import com.llmServer.controller.LLMRoutes
+import com.llmServer.util.ConfigLoader
 
 import scala.concurrent.duration._
 
 class LLMRouterTest extends AnyWordSpec with Matchers with ScalatestRouteTest {
+
+  // Set config
+  ConfigLoader.setConfig("local")
 
   // Increase default timeout for route testing
   implicit val routeTestTimeout: RouteTestTimeout = RouteTestTimeout(20.seconds)

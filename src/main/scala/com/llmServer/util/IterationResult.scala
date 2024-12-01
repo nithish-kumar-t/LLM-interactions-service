@@ -4,6 +4,7 @@ import org.slf4j.LoggerFactory
 import org.yaml.snakeyaml.{DumperOptions, Yaml}
 
 import java.io.{BufferedWriter, File, FileWriter}
+import java.nio.file.{Files, Paths}
 import java.time.Instant
 import scala.collection.mutable.ListBuffer
 import scala.jdk.CollectionConverters._
@@ -59,7 +60,14 @@ object YAML_Helper {
    *                Each result is converted into YAML format and written to a file.
    */
   def save(results: ListBuffer[IterationResult], totalInteractions:Int, totalTimeSeconds : Long, terminationCondition: String): Unit = {
-    val file = new File("src/main/resources/conversation-agents/iteration_results-" + Instant.now().toString + ".yaml")
+    val directory = ConfigLoader.getConfig("conversationPath").toString
+    // Check if directory exists or not, if not create one.
+    val directoryPath= Paths.get(directory)
+    if (!Files.exists(directoryPath)) {
+      logger.info(s"directory created successfully at $directory")
+      Files.createDirectories(directoryPath)
+    }
+    val file = new File(s"$directory/" + "conversation-result-" +Instant.now().toString + ".yaml")
     val writer = new BufferedWriter(new FileWriter(file))
 
     try {
@@ -84,7 +92,6 @@ object YAML_Helper {
         ).asJava
       ).asJava
       yaml.dump(statistics, writer)
-
 
       logger.info(s"YAML file created at: ${file.getAbsolutePath}")
     } finally {

@@ -1,27 +1,36 @@
 package com.llmServer.util
 
 import com.typesafe.config.{Config, ConfigFactory}
+import org.slf4j.LoggerFactory
+
+import scala.collection.mutable
 
 /**
- * `ConfigLoader` is a utility object for loading and retrieving application configurations.
+ * `ConfigGetter` is a utility object for loading and retrieving application configurations.
  * It uses Typesafe Config to manage configuration properties from `application.conf` or other sources.
  */
 object ConfigLoader {
-
+  private val logger = LoggerFactory.getLogger(getClass)
+  val configMap: mutable.Map[String, String] = mutable.Map()
   // Load the configuration from the default configuration file (application.conf)
   val config: Config = ConfigFactory.load()
 
-  def loadConfig(): Config = {
-    config
+  //Loading all the config when starting of the application
+  def setConfig(env : String): Unit = {
+    configMap.put("ollama.host", config.getString(s"$env.ollama.host"))
+    configMap.put("ollama.request-timeout-seconds", config.getString(s"$env.ollama.request-timeout-seconds"))
+    configMap.put("ollama.model", config.getString(s"$env.ollama.model"))
+    configMap.put("ollama.range", config.getString(s"$env.ollama.range"))
+    configMap.put("maxWords", config.getString("maxWords"))
+    configMap.put("lambdaApiGateway", config.getString("lambdaApiGateway"))
+    configMap.put("conversationPath", config.getString(s"$env.conversationPath"))
+    configMap.put("server", config.getString(s"$env.server"))
+
+    logger.info(configMap.mkString("\n"))
   }
 
-  /**
-   * Retrieves a specific configuration value as a string.
-   *
-   * @param key The key of the configuration property to retrieve.
-   * @return The value of the configuration property as a string.
-   */
   def getConfig(key: String): String = {
-    config.getString(key)
+    configMap.getOrElse(key, "")
   }
+
 }

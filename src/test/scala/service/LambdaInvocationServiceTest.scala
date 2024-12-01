@@ -3,6 +3,7 @@ package service
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpResponse}
 import akka.stream.Materializer
+import com.llmServer.util.ConfigLoader
 //import com.llmServer.service.LambdaInvocationService
 import org.scalatest.flatspec.AsyncFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -16,6 +17,7 @@ class LambdaInvocationServiceTest extends AsyncFlatSpec with Matchers {
   private val logger = LoggerFactory.getLogger(getClass)
   implicit val system: ActorSystem = ActorSystem("ApiTestSystem")
   implicit val materializer: Materializer = Materializer(system)
+  ConfigLoader.setConfig("local")
 
   "LambdaInvocationService" should "successfully handle valid API requests" in {
     val llmQueryReq = new LlmQueryRequest("A quick brown fox jumps over a ", 100)

@@ -5,7 +5,8 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-import com.llmServer.service.{AutomatedConversationalAgent}
+import com.llmServer.service.AutomatedConversationalAgent
+import com.llmServer.util.ConfigLoader
 import org.slf4j.LoggerFactory
 import com.llmServer.util.JsonFormats._
 
@@ -72,7 +73,7 @@ object LLMRoutes {
             complete(
               StatusCodes.Accepted,
               "Conversation started, Please check for file in location " +
-                "src/main/resources/agent-resp/convestn-{timestamp}"
+                s"${ConfigLoader.getConfig("conversationPath")}/conversation-result-{timestamp}"
             )
           }
         }
