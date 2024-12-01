@@ -162,17 +162,15 @@ sbt:LLM-hw2-jar>
 
 
 
-
-
 ## Prerequisites
 
 1. **AWS BedRock**: Set up Aws bedrock api to use it in the lamba function.
 
-2. **AWS Account**: Create an AWS account and familiarize yourself with AWS EMR.
+2. **AWS Account**: Create an AWS account and familiarize yourself with AWS Lambda, EC2, and AWS Api Gateway.
 
-3. **Deeplearning4j Library**: Ensure that you have the Java Deeplearning4j Library integrated into your project for getting the model.
+3. **Protobuf**: Ensure that you have the google protobuf module downloaded in the 
 
-4. **Scala, Java and Spark**: Make sure Scala, Java and Hadoop (Scala 2.13.13, Java 11.0.25)  are installed and configured correctly.
+4. **Scala, Java and Spark**: Make sure Scala, Java and Hadoop (Scala 2.13.13, Java 11.0.25 Ollama: llama3.2)   are installed and configured correctly.
 
 5. **Git and GitHub**: Use Git for version control and host your project repository on GitHub.
 
@@ -184,22 +182,19 @@ sbt:LLM-hw2-jar>
 
 Follow these steps to execute the project:
 
-1. **Data Gathering**: Ensure you have selected a dataset and it will be ready to get processed by you Spark jobs.
+1. **Local Setup**: Ensure you downloaded Ollama in Local and pulled model with id **llama3.2**
 
-2. **Configuration**: Set up the necessary configuration parameters and input file paths.
+2. **Configuration**: Set up the necessary configuration parameters for Ollama and AWS Api gateway URI for triggering lambda. 
 
-3. **Spark Execution**:
+3. **API Execution**:
 
-   a. Run the TextGenerationInLLM job to train the model with data that takes care of the contect and position, It will 
+   a. Using Postman, trigger the query-llm endpoint. This will initiate a gRPC call to the API Gateway, which in turn triggers the Lambda function. The Lambda function processes the request and returns the serialized response back to the client.
 
-   b. Run the LLMEncoder job to create vector embeddings, it will create vector embedings and write that in a file.
+   b. Now trigger start-conversation-agent endpoint, which is the entry point for conversational agent.
 
-4. **Results**: Examine the results obtained from the MapReduce jobs.
+4. **Results**: Examine the results obtained from the conversational agent
 
-   a. Training info will be stored in a csv file src/main/resources/output/OUT-{TIME}/training_metrics.csv
-
-   b. Generated text will be stored heresrc/main/resources/output/OUT-{TIME}/generated-data.txt
-
+   a. Conversations are stored in YAML file src/main/resources/conversation-agents/iteration_results-{TIME-STAMP}.yaml
 
 
 
@@ -208,7 +203,8 @@ Follow these steps to execute the project:
 **Code coverage report**
 
 
-<img width="520" alt="image" src="https://github.com/user-attachments/assets/130d452b-ab66-4bbf-be84-ee08581e3b2b">
+<img width="402" alt="image" src="https://github.com/user-attachments/assets/1916fe44-2369-4f48-979c-dc36cab12358">
+
 
 
 
