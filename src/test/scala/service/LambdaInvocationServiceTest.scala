@@ -1,33 +1,35 @@
+package service
+
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpResponse}
 import akka.stream.Materializer
 import org.scalatest.flatspec.AsyncFlatSpec
 import org.scalatest.matchers.should.Matchers
+import org.slf4j.LoggerFactory
 import protobuf.llmQuery.{LlmQueryRequest, LlmQueryResponse}
 
+import java.nio.file.{Files, Paths}
 import scala.concurrent.Future
 
 class LambdaInvocationServiceTest extends AsyncFlatSpec with Matchers {
+  private val logger = LoggerFactory.getLogger(getClass)
   implicit val system: ActorSystem = ActorSystem("ApiTestSystem")
   implicit val materializer: Materializer = Materializer(system)
 
-  "ApiInvocationHelper" should "successfully handle valid API requests" in {
-    val validRequest = LlmQueryRequest("input text", maxWords = 100)
+  "LambdaInvocationService" should "successfully handle valid API requests" in {
+    val llmQueryReq = new LlmQueryRequest("A quick brown fox jumps over a ", 100)
 
-    // Simulate successful API call
-    val responseBody = """{"input": "input text", "output": "output text"}"""
-    val response = HttpResponse(
-      entity = HttpEntity(ContentTypes.`application/json`, responseBody)
-    )
+    val resultFuture: Future[Unit] = Future {
+      LambdaInvocationService.queryLLM(llmQueryReq)
+    }
 
-    // Simulate a successful API call
-    val mockFuture: Future[LlmQueryResponse] = Future.successful(
-      LlmQueryResponse("input text", "output text")
-    )
+    resultFuture.map { _ =>
+      val directoryPath = "/Users/tnithish/Learning/CS-441/LLM-interactions-service/src/main/resources/conversation-agents"
+      val directory = Paths.get(directoryPath)
 
-    mockFuture.map { result =>
-      result.input shouldEqual "input text"
-      result.output shouldEqual "output text"
+      // Assert the output directory contains files as expected
+      Files.list(directory).count() shouldBe >= (1L)
+      succeed // Return an assertion to match the required type
     }
   }
 
@@ -56,6 +58,8 @@ class LambdaInvocationServiceTest extends AsyncFlatSpec with Matchers {
     val errorMessage = "API call failed with status: 500, Internal Server Error"
     val mockFuture: Future[LlmQueryResponse] = Future.failed(new RuntimeException(errorMessage))
 
-    recoverToSucceededIf[RuntimeException](mockFuture)
+    recoverToExceptionIf[RuntimeException](mockFuture).map { ex =>
+      ex.getMessage should include("API call failed with status: 500")
+    }
   }
 }

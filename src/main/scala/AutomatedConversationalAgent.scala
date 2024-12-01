@@ -1,8 +1,8 @@
 import akka.actor.ActorSystem
-import protobuf.llmQuery.{LlmQueryRequest, LlmQueryResponse}
 import io.github.ollama4j.OllamaAPI
 import io.github.ollama4j.utils.Options
 import org.slf4j.LoggerFactory
+import protobuf.llmQuery.LlmQueryRequest
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -24,19 +24,18 @@ object AutomatedConversationalAgent {
   def main(args: Array[String]): Unit = {
     if (args.isEmpty) {
       logger.error("input seed text not passed")
-      sys.exit(-1)
-    }
+    } else {
+      val seedText = args(0)
+      val protoRequest: LlmQueryRequest = new LlmQueryRequest(seedText, 100)
 
-    val seedText = args(0)
-    val protoRequest: LlmQueryRequest = new LlmQueryRequest(seedText, 100)
+      // Create an ActorSystem
+      implicit val system: ActorSystem = ActorSystem("AutomatedConversationalAgentSystem")
 
-    // Create an ActorSystem
-    implicit val system: ActorSystem = ActorSystem("AutomatedConversationalAgentSystem")
-
-    try {
-      start(protoRequest)
-    } finally {
-      system.terminate()
+      try {
+        start(protoRequest)
+      } finally {
+        system.terminate()
+      }
     }
   }
 

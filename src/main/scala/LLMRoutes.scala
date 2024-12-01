@@ -1,14 +1,15 @@
+package controller
+
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Directives.{entity, _}
 import akka.http.scaladsl.server.Route
-import JsonFormats._
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import org.slf4j.LoggerFactory
+import protobuf.llmQuery._
+import service.{AutomatedConversationalAgent, LambdaInvocationService}
+import util.JsonFormats._
 
 import scala.concurrent.{ExecutionContext, Future}
-import protobuf.llmQuery._
-
 import scala.util.{Failure, Success}
 
 object LLMRoutes {
@@ -20,7 +21,7 @@ object LLMRoutes {
 
     concat(
       path("query-llm") {
-        get {
+        post {
           entity(as[LlmQueryRequest]) { request =>
             // Use onSuccess to handle the asynchronous API call
             onSuccess(LambdaInvocationService.queryLLM(request)) { response =>
@@ -30,7 +31,7 @@ object LLMRoutes {
         }
       },
       path("start-conversation-agent") {
-        get {
+        post {
           entity(as[LlmQueryRequest]) { request =>
             // Start AutomatedConversationalAgent in a separate thread
              Future {
@@ -53,7 +54,7 @@ object LLMRoutes {
       },
       path("health") {
         get {
-          complete(StatusCodes.OK, "LLM REST Service is up and running!")
+          complete(HttpResponse(StatusCodes.OK, entity = "Service is up and healthy"))
         }
       }
     )

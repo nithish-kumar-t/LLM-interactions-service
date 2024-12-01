@@ -1,17 +1,16 @@
+import JsonFormats.llmQueryResponseFormat
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.stream.ActorMaterializer
-import JsonFormats._
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
 // Convert request to JSON
-import spray.json._
-
 import protobuf.llmQuery.{LlmQueryRequest, LlmQueryResponse}
+import spray.json._
 object LambdaInvocationService {
   private val logger = LoggerFactory.getLogger(getClass)
 

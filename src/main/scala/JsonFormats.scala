@@ -1,6 +1,6 @@
-import spray.json._
-import DefaultJsonProtocol._
 import protobuf.llmQuery.{LlmQueryRequest, LlmQueryResponse}
+import spray.json.DefaultJsonProtocol._
+import spray.json._
 
 // Intermediate case classes for proto objects
 case class LlmQueryRequestCase(input: String, maxWords: Int)

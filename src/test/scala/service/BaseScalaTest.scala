@@ -1,3 +1,5 @@
+package service
+
 object BaseScalaTest
 
 
@@ -7,9 +9,9 @@ import org.scalatest.matchers.must.Matchers
 
 import java.nio.file.{Files, Paths}
 
-class BaseScalaTest extends AnyFlatSpec with Matchers with BeforeAndAfter{
+class BaseScalaTest extends AnyFlatSpec with Matchers with BeforeAndAfter {
   // Output directory path
-  val directoryPath = "src/main/resources/output"
+  val directoryPath = "src/main/resources/conversation-agents"
   val directory = Paths.get(directoryPath)
 
   before {
@@ -31,13 +33,13 @@ class BaseScalaTest extends AnyFlatSpec with Matchers with BeforeAndAfter{
 
   after {
     //delete the files in the output directory after the completion of the program
-    if (Files.exists(directory) && Files.isDirectory(directory)) {
-      Files.list(directory).forEach(file => {
-        if (!Files.isRegularFile(file)) {
-          Files.walk(file).sorted(java.util.Comparator.reverseOrder()).forEach(Files.delete)
-        }
-      })
-    }
+//    if (Files.exists(directory) && Files.isDirectory(directory)) {
+//      Files.list(directory).forEach(file => {
+//        if (!Files.isRegularFile(file)) {
+//          Files.walk(file).sorted(java.util.Comparator.reverseOrder()).forEach(Files.delete)
+//        }
+//      })
+//    }
   }
 
 }

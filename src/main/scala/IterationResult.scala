@@ -1,8 +1,8 @@
 import org.yaml.snakeyaml.{DumperOptions, Yaml}
 
-import scala.collection.mutable.ListBuffer
 import java.io.{BufferedWriter, File, FileWriter}
 import java.time.Instant
+import scala.collection.mutable.ListBuffer
 import scala.jdk.CollectionConverters._
 
 case class IterationResult(
@@ -31,7 +31,7 @@ object YAML_Helper {
                     llmResp: String,
                     ollamaResp: String
                   ): Unit = {
-    results += IterationResult(s"Itr-$iteration", question, llmResp, ollamaResp)
+    results += IterationResult(s"Question-$iteration", question, llmResp, ollamaResp)
   }
 
   def save(results: ListBuffer[IterationResult]): Unit = {

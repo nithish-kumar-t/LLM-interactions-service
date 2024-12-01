@@ -22,8 +22,12 @@ lazy val root = project
       "com.thesamet.scalapb" %% "scalapb-json4s" % "0.11.0",
       "com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf",
       "org.scalatest" %% "scalatest" % "3.2.16" % Test,
+      "com.typesafe.akka" %% "akka-http-testkit" % "10.2.10" % Test, // Akka test
+      "com.typesafe.akka" %% "akka-testkit" % "2.6.20" % Test,
       "org.slf4j" % "slf4j-simple" % "2.0.13", //  logging
       "org.yaml" % "snakeyaml" % "1.24",              // For YAML processing
+      "org.mockito" %% "mockito-scala" % "1.17.14",
+      "org.mockito" %% "mockito-scala-scalatest" % "1.17.12" % Test,
       "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml" % "2.17.2", // Optional: Jackson for YAML
       "org.scalameta" %% "munit" % "1.0.0" % Test
     ),
