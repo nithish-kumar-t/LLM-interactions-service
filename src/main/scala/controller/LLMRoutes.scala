@@ -1,19 +1,20 @@
-package controller
-
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.server.Directives.{entity, _}
+import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import org.slf4j.LoggerFactory
-import protobuf.llmQuery._
-import service.{AutomatedConversationalAgent, LambdaInvocationService}
 import util.JsonFormats._
 
 import scala.concurrent.{ExecutionContext, Future}
+import protobuf.llmQuery._
+import service.{AutomatedConversationalAgent, LambdaInvocationService}
+
 import scala.util.{Failure, Success}
 
 object LLMRoutes {
   private val logger = LoggerFactory.getLogger(getClass)
+  private val OLLAMA_QUERIES_RANGE = "ollama.range"
 
   def routes(implicit system: ActorSystem): Route = {
     // ExecutionContext for handling Futures
@@ -34,13 +35,13 @@ object LLMRoutes {
         post {
           entity(as[LlmQueryRequest]) { request =>
             // Start AutomatedConversationalAgent in a separate thread
-             Future {
+            Future {
               logger.info("Starting Automated Conversational Agent...")
               AutomatedConversationalAgent.start(request)
               logger.info(s"Successfully completed the execution of the client...")
             }.onComplete{
-               case Success(value) => println(s"Successfully completed the execution of the client $value")
-               case Failure(ex)    => println(s"An error occurred when executing the client: $ex")
+              case Success(value) => println(s"Successfully completed the execution of the client $value")
+              case Failure(ex)    => println(s"An error occurred when executing the client: $ex")
             }
 
             // Immediately respond to the client
@@ -54,7 +55,7 @@ object LLMRoutes {
       },
       path("health") {
         get {
-          complete(HttpResponse(StatusCodes.OK, entity = "Service is up and healthy"))
+          complete(StatusCodes.OK, "LLM REST Service is up and running!")
         }
       }
     )

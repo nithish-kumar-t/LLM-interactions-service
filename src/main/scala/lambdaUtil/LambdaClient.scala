@@ -1,3 +1,5 @@
+package lambdaUtil
+
 import software.amazon.awssdk.core.SdkBytes
 import software.amazon.awssdk.services.lambda.LambdaClient
 import software.amazon.awssdk.services.lambda.model._

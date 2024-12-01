@@ -1,8 +1,11 @@
+package service
+
 import akka.actor.ActorSystem
 import io.github.ollama4j.OllamaAPI
 import io.github.ollama4j.utils.Options
 import org.slf4j.LoggerFactory
 import protobuf.llmQuery.LlmQueryRequest
+import util.{ConfigLoader, YAML_Helper}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._

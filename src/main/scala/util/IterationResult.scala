@@ -1,3 +1,5 @@
+package util
+
 import org.yaml.snakeyaml.{DumperOptions, Yaml}
 
 import java.io.{BufferedWriter, File, FileWriter}
@@ -31,7 +33,7 @@ object YAML_Helper {
                     llmResp: String,
                     ollamaResp: String
                   ): Unit = {
-    results += IterationResult(s"Question-$iteration", question, llmResp, ollamaResp)
+    results += IterationResult(s"Iteration-$iteration", question, llmResp, ollamaResp)
   }
 
   def save(results: ListBuffer[IterationResult]): Unit = {

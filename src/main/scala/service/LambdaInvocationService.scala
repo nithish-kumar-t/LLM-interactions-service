@@ -1,9 +1,12 @@
-import JsonFormats.llmQueryResponseFormat
+package service
+
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.stream.ActorMaterializer
 import org.slf4j.LoggerFactory
+import util.ConfigLoader
+import util.JsonFormats.llmQueryResponseFormat
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
