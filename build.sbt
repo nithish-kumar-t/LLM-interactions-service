@@ -9,7 +9,7 @@ lazy val root = project
     name := "LLM-hw3",
     version := "0.1.0-SNAPSHOT",
     scalaVersion := "2.13.13",
-
+    mainClass in Compile := Some("LLMServer"), // Replace with your main class
     libraryDependencies ++= Seq(
       "com.typesafe.akka" %% "akka-actor" % "2.6.20",
       "com.typesafe.akka" %% "akka-stream" % "2.6.20",

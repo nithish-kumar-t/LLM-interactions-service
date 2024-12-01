@@ -15,7 +15,7 @@ class BaseScalaTest extends AnyFlatSpec with Matchers with BeforeAndAfter {
   val directory = Paths.get(directoryPath)
 
   before {
-     Check if the directory exists
+    // Check if the directory exists
     if (Files.exists(directory) && Files.isDirectory(directory)) {
       // List all files in the directory and delete them
       Files.list(directory).forEach { file =>
