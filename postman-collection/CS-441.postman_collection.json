@@ -7,10 +7,58 @@
 	},
 	"item": [
 		{
-			"name": "New Request",
+			"name": "ConversationalAgent",
 			"request": {
-				"method": "GET",
-				"header": []
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"input\": \"A slow blink from a cat is like a\",\n    \"maxWords\": 100\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/start-conversation-agent",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"start-conversation-agent"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "QueryLLm",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"input\": \"A slow blink from a cat is like a\",\n    \"maxWords\": 100\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/query-llm",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"query-llm"
+					]
+				}
 			},
 			"response": []
 		}

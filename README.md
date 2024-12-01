@@ -248,12 +248,12 @@ statistics:
 
 
 ### 1. Install Docker
-- Download docker [Docker's official website](https://www.docker.com/).
+   Docker must be installed on the system.
 
-### 2. Set Up Ollama Container, execute below steps
+### 2. Set Up Ollama Container and execute below steps
 
 ```
-1. Pull the Ollama container:
+ 1. Pull the Ollama container:
    docker pull ollama/ollama
    
 ⁠ 2. Run the Ollama container:
@@ -265,29 +265,29 @@ statistics:
 ```
 
 ### 3. Build the sbt Application
-1. Create the JAR file using `sbt`:
-   ```
-   sbt assembly
-   ```
+   1. Create the JAR file using `sbt`:
+      ```
+      sbt assembly
+      ```
    
-⁠ 2. Build the Docker image:
+⁠   2. Build the Docker image:
    
-   ```
-   docker build -t cs-441-LLM-interaction-service .
-   ```
- 3. Ensure jar is accessible from cmd
-   ```
-   java -jar target/scala-2.13/LLM-hw3-assembly-0.1.0-SNAPSHOT.jar local
-   ```
+      ```
+      docker build -t cs-441-LLM-interaction-service .
+      ```
+
+   3. Ensure jar is accessible from cmd
+      ```
+      java -jar target/scala-2.13/LLM-hw3-assembly-0.1.0-SNAPSHOT.jar local
+      ```
 
 
 ### 4. Run the Dockerized Application
-- Start the application container, linking it with the Ollama container:
+   Start the application container, linking it with the Ollama container:
 ```
   docker run -d -p 8080:8080 --name cs-441-LLM-container --link ollama-container cs-441-LLM-interaction-service
 ```
   
-⁠ ---
 
 ** We can run the docker from postman or by curl requests.
 
