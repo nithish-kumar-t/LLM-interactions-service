@@ -140,53 +140,57 @@ sbt:LLM-hw2-jar>
 ```
 
 
-<!---
-## Running the Project in aws
 
+## Setting up the LLM Client in AWS EC2
 
-## Prerequisites
+1. Create a **EC2** Instance and install all the dependencies
 
-1. **AWS BedRock**: Set up Aws bedrock api to use it in the lamba function.
+2. Select Ubuntu or Amazon linux, Processing Instance Unit Type (t3.Medium) , as We need atleast 4GB memory because the smallest Ollama needs ~3GB to run.
 
-2. **AWS Account**: Create an AWS account and familiarize yourself with AWS Lambda, EC2, and AWS Api Gateway.
-
-3. **Protobuf**: Ensure that you have the google protobuf module downloaded in the 
-
-4. **Scala, Java and Spark**: Make sure Scala, Java and Hadoop (Scala 2.13.13, Java 11.0.25 Ollama: 1.0.79)   are installed and configured correctly.
-
-5. Install Ollama and Download Models 
-   Sign Up for Ollama: Create an account on Ollama if you haven't already.
-   Install Ollama Local Server: Follow the Ollama Installation Guide.
-   Download a Model: For example, download llama3:latest.
-```
-bash
-Copy code
-ollama pull llama3:latest
-ollama pull llama3.2
-```
-
-6. **Git and GitHub**: Use Git for version control and host your project repository on GitHub.
-
-7. Start the server with environment variables
--->
-
-Update the application.conf file with your Ollama and AWS configurations.
+3. After creating the instance SSH the instance into your local
 
 ```
-ollama {
-  host = "http://localhost:11434"
-  model = "llama3:latest"
-  request-timeout-seconds = 500
-}
+   ssh -i "{credentials-path}" {EC2-public URL}
+```
+4. Inatall, Java, Docker and Ollama into the EC2 from terminal
 
-aws {
-  region = "your-aws-region"
-  access-key = "YOUR_AWS_ACCESS_KEY"
-  secret-key = "YOUR_AWS_SECRET_KEY"
-}
+<img width="1512" alt="image" src="https://github.com/user-attachments/assets/7b59f30a-5270-43f8-b828-16f85eb80aa6">
+
+5. Once everything is setup run the jar using below command from SSH terminal
+
+```
+   java -jar LLM-hw3-assembly-0.1.0-SNAPSHOT.jar cloud
+
 ```
 
-8. **IDE**: Use an Integrated Development Environment (IDE) for coding and development.
+6. Now using postman we can run these 2 API's
+
+-   Conversational Agent
+   ```
+   curl --location 'http://ec2-18-226-82-140.us-east-2.compute.amazonaws.com:8080/start-conversation-agent' \
+   --header 'Content-Type: application/json' \
+   --data '{
+       "input": "The curious cat leaps onto the high fence",
+       "maxWords": 100
+   }'
+   ```
+- LLM to Lambda-Bedrock
+   
+   ```
+   curl --location 'http://ec2-18-226-82-140.us-east-2.compute.amazonaws.com:8080/query-llm' \
+   --header 'Content-Type: application/json' \
+   --data '{
+       "input": "A slow blink from a cat is like a",
+       "maxWords": 100
+   }'
+   ```
+
+7. The COnversations from the Ollama will be stored on AWS s3
+
+```
+s3://nithish-llm-hw3/output/conversation-agents/
+```
+
 
 
 
