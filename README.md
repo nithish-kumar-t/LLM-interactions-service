@@ -214,7 +214,7 @@ Follow these steps to execute the project:
 
 
 
-###Data File Formats
+### Data File Formats
 
 The conversational interactions and statistics are logged in YAML or CSV formats. Example structures are as follows:
 
@@ -275,7 +275,6 @@ statistics:
       ```
    
 ⁠   2. Build the Docker image:
-   
       ```
       docker build -t cs-441-LLM-interaction-service .
       ```
@@ -288,12 +287,12 @@ statistics:
 
 ### 4. Run the Dockerized Application
    Start the application container, linking it with the Ollama container:
-```
-  docker run -d -p 8080:8080 --name cs-441-LLM-container --link ollama-container cs-441-LLM-interaction-service
-```
+   ```
+   docker run -d -p 8080:8080 --name cs-441-LLM-container --link ollama-container cs-441-LLM-interaction-service
+   ```
   
 
-** We can run the docker from postman or by curl requests.
+**We can run the docker from postman or by curl requests.**
 
 ## Unit / Regression Testing
 
