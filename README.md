@@ -9,7 +9,6 @@
 
 This project focused on developing a conversational agent using a microservice-based architecture. The agent processes user queries, interacts with a Large Language Model (LLM) deployed on AWS, and generates conversational responses. The implementation includes key components such as an HTTP-based RESTful service, integration with AWS Lambda and API Gateway. The interaction with the conversational agent is fully automated, once a user submits a request, the agent continuously queries the LLM based on responses until the specified condition is satisfied.
 
-[Youtube Video Link](https://youtu.be/u3c1odGXp6I)
 
 
 ##  Project structure
